@@ -789,6 +789,28 @@ describe('Request', () => {
             expect(res.payload).to.equal('hola');
         });
 
+
+        it('supports custom query parser (raw query string)', async () => {
+
+            const parser = (query, raw) => {
+
+                query.raw = raw;
+                return query;
+            };
+
+            const server = Hapi.server({ query: { parser } });
+
+            server.route({
+                method: 'GET', path: '/', options: {
+                    handler: (request) => request.query.raw
+                }
+            });
+
+            const res = await server.inject('/?hi=hola');
+            expect(res.statusCode).to.equal(200);
+            expect(res.payload).to.equal('hi=hola');
+        });
+
         it('returns 500 when custom query parser returns non-object', async () => {
 
             const server = Hapi.server({ debug: false, query: { parser: () => 'something' } });
